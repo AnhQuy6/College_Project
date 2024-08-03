@@ -147,3 +147,5 @@ F:\FileC#\CollegeApp\CollegeApp\bin\Debug\net8.0\Serilog.Sinks.File.dll
 F:\FileC#\CollegeApp\CollegeApp\bin\Debug\net8.0\log4net.config
 F:\FileC#\CollegeApp\CollegeApp\bin\Debug\net8.0\log4net.dll
 F:\FileC#\CollegeApp\CollegeApp\bin\Debug\net8.0\Microsoft.Extensions.Logging.Log4Net.AspNetCore.dll
+F:\FileC#\CollegeApp\CollegeApp\obj\Debug\net8.0\CollegeApp.sourcelink.json
+F:\FileC#\CollegeApp\CollegeApp\bin\Debug\net8.0\AutoMapper.dll

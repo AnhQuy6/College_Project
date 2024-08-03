@@ -1,4 +1,5 @@
-﻿using CollegeApp.Data;
+﻿using AutoMapper;
+using CollegeApp.Data;
 using CollegeApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -16,32 +17,25 @@ namespace CollegeApp.Controllers
     {
         private readonly CollegeDBContext _context;
         private readonly ILogger<StudentController> _logger;
+        private readonly IMapper _mapper;
 
-        public StudentController(CollegeDBContext context, ILogger<StudentController> logger)
+        public StudentController(CollegeDBContext context, ILogger<StudentController> logger, IMapper mapper)
         {
             _context = context;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [Route("All")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentsAsync()
         {
             _logger.LogInformation("Get Students method started");
-            var students = await _context.Students
-                .Select(item => new StudentDTO
-                {
-                    Id = item.Id,
-                    StudentName = item.StudentName,
-                    Email = item.Email,
-                    Address = item.Address,
-                    DOB = item.DOB
-                })
-                .ToListAsync();
-
-            return Ok(students);
+            var students = await _context.Students.ToListAsync();
+            var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
+            return Ok(studentDTOData);
         }
 
         [HttpGet]
@@ -50,7 +44,7 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
+        public async Task<ActionResult<StudentDTO>> GetStudentByIdAsync(int id)
         {
             if (id <= 0)
             {
@@ -58,17 +52,7 @@ namespace CollegeApp.Controllers
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var student = await _context.Students
-                .Where(s => s.Id == id)
-                .Select(s => new StudentDTO
-                {
-                    Id = s.Id,
-                    StudentName = s.StudentName,
-                    Email = s.Email,
-                    Address = s.Address,
-                    DOB = s.DOB
-                })
-                .FirstOrDefaultAsync();
+            var student = await _context.Students.Where(s => s.Id == id).FirstOrDefaultAsync();
 
             if (student == null)
             {
@@ -76,7 +60,9 @@ namespace CollegeApp.Controllers
                 return NotFound($"Không tìm thấy sinh viên có Id là {id}");
             }
 
-            return Ok(student);
+            var studentDTO = _mapper.Map<StudentDTO>(student);
+
+            return Ok(studentDTO);
         }
 
         [HttpGet]
@@ -85,7 +71,7 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentByName(string name)
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentByNameAsync(string name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -94,24 +80,16 @@ namespace CollegeApp.Controllers
 
             name = name.ToLower();
 
-            var students = await _context.Students
-                .Where(s => s.StudentName.ToLower().Contains(name))
-                .Select(s => new StudentDTO
-                {
-                    Id = s.Id,
-                    StudentName = s.StudentName,
-                    Email = s.Email,
-                    Address = s.Address,
-                    DOB = s.DOB
-                })
-                .ToListAsync();
+            var students = await _context.Students.Where(s => s.StudentName.ToLower().Contains(name)).ToListAsync();
 
             if (!students.Any())
             {
                 return NotFound("Không tìm thấy dữ liệu");
             }
 
-            return Ok(students);
+            var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
+
+            return Ok(studentDTOData);
         }
 
         [HttpDelete]
@@ -120,7 +98,7 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteStudentById(int id)
+        public async Task<IActionResult> DeleteStudentByIdAsync(int id)
         {
             if (id <= 0)
             {
@@ -145,20 +123,14 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<StudentDTO>> CreateStudent([FromBody] StudentDTO model)
+        public async Task<ActionResult<StudentDTO>> CreateStudentAsync([FromBody] StudentDTO model)
         {
             if (model == null || string.IsNullOrWhiteSpace(model.StudentName) || string.IsNullOrWhiteSpace(model.Email))
             {
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var student = new Student
-            {
-                StudentName = model.StudentName,
-                Email = model.Email,
-                Address = model.Address,
-                DOB = model.DOB,
-            };
+            var student = _mapper.Map<Student>(model);
 
             _context.Students.Add(student);
             await _context.SaveChangesAsync();
@@ -173,24 +145,22 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> UpdateStudent([FromBody] StudentDTO model)
+        public async Task<ActionResult> UpdateStudentAsync([FromBody] StudentDTO model)
         {
             if (model == null || model.Id <= 0)
             {
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var existingStudent = await _context.Students.FindAsync(model.Id);
+            var existingStudent = await _context.Students.AsNoTracking().Where(s => s.Id == model.Id).FirstOrDefaultAsync();
 
             if (existingStudent == null)
             {
                 return NotFound($"Không tìm thấy sinh viên có Id là {model.Id}");
             }
 
-            existingStudent.StudentName = model.StudentName;
-            existingStudent.Email = model.Email;
-            existingStudent.Address = model.Address;
-            existingStudent.DOB = model.DOB;
+            var newRecord = _mapper.Map<Student>(model);
+            _context.Students.Update(newRecord);
 
             await _context.SaveChangesAsync();
 

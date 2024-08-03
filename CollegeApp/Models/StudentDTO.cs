@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CollegeApp.Data;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CollegeApp.Models
@@ -15,7 +16,7 @@ namespace CollegeApp.Models
         [StringLength(50, ErrorMessage = "Do dai du lieu khong duoc qua 50 ki tu")]
         public string Address { get; set; }
         [Required(ErrorMessage = "Khong duoc de trong du lieu, vui long nhap lai")]
-        
         public DateTime DOB { get; set; }
+
     }
 }

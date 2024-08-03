@@ -1,4 +1,5 @@
 
+using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.MyLogging;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,11 @@ namespace CollegeApp
             //builder.Logging.AddLog4Net();
 
             #region Serilog Setttings
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.File("Log/log.txt", rollingInterval: RollingInterval.Minute)
-                .CreateLogger();
-            builder.Services.AddSerilog();
+            //Log.Logger = new LoggerConfiguration()
+            //    .MinimumLevel.Information()
+            //    .WriteTo.File("Log/log.txt", rollingInterval: RollingInterval.Minute)
+            //    .CreateLogger();
+            //builder.Services.AddSerilog();
             //Add services to the container.
             #endregion
             builder.Services.AddControllers();
@@ -32,6 +33,7 @@ namespace CollegeApp
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnect"));
             });
+            builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
             builder.Services.AddCors(options => options.AddPolicy("MyTestCORS", policy =>
             {
                 //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
