@@ -1,0 +1,8 @@
+2024-07-29 14:31:23,031 [.NET TP Worker] WARN  CollegeApp.Controllers.DemoController - Log message from warning
+2024-07-29 14:31:23,038 [.NET TP Worker] ERROR CollegeApp.Controllers.DemoController - Log message from error
+2024-07-29 14:31:23,041 [.NET TP Worker] FATAL CollegeApp.Controllers.DemoController - Log message from critical
+2024-07-29 14:31:46,142 [1] INFO  Microsoft.Hosting.Lifetime - Now listening on: https://localhost:7053
+2024-07-29 14:31:46,154 [1] INFO  Microsoft.Hosting.Lifetime - Now listening on: http://localhost:5255
+2024-07-29 14:31:46,160 [1] INFO  Microsoft.Hosting.Lifetime - Application started. Press Ctrl+C to shut down.
+2024-07-29 14:31:46,164 [1] INFO  Microsoft.Hosting.Lifetime - Hosting environment: Development
+2024-07-29 14:31:46,170 [1] INFO  Microsoft.Hosting.Lifetime - Content root path: F:\FileC#\CollegeApp\CollegeApp
