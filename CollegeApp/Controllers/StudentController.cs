@@ -160,7 +160,6 @@ namespace CollegeApp.Controllers
             }
 
             var newRecord = _mapper.Map<Student>(model);
-            _context.Students.Update(newRecord);
 
             await _context.SaveChangesAsync();
 
