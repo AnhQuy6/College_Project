@@ -37,11 +37,25 @@ namespace CollegeApp
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnect"));
             });
             builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
-            builder.Services.AddCors(options => options.AddPolicy("MyTestCORS", policy =>
+            builder.Services.AddCors(options =>
             {
-                //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
-            }));
+                //options.AddDefaultPolicy(policy =>
+                //{
+                //    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                //});
+                options.AddPolicy("AllowAll" ,policy =>
+                {
+                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+                options.AddPolicy("AllowOnlyLocalhost", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+                });
+                options.AddPolicy("AllowOnlyMicrosoft", policy =>
+                {
+                    policy.WithOrigins("http://microsoft.com").AllowAnyHeader().AllowAnyMethod();
+                });
+            });
 
             var app = builder.Build();
 
@@ -53,11 +67,25 @@ namespace CollegeApp
             }
 
             app.UseHttpsRedirection();
+            app.UseRouting();
 
-            app.UseCors("MyTestCORS");
+            app.UseCors("AllowAll");
 
             app.UseAuthorization();
 
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("api/testingendpoint",
+                    context => context.Response.WriteAsync("Test 1"))
+                    .RequireCors("AllowOnlyLocalhost");
+
+                endpoints.MapControllers()
+                         .RequireCors("AllowAll");
+
+                endpoints.MapGet("api/testingendpoint2",
+                    context => context.Response.WriteAsync("Test Response 2"));
+
+            });
 
             app.MapControllers();
 
