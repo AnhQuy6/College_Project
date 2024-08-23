@@ -16,6 +16,7 @@ namespace CollegeApp.Data
             modelBuilder.ApplyConfiguration(new StudentConfig());
         }
         public DbSet<Student> Students { get; set; }
+        public DbSet<Department> Departments { get; set; }
         
     }
 }

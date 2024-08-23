@@ -1,6 +1,7 @@
 
 using CollegeApp.Configurations;
 using CollegeApp.Data;
+using CollegeApp.Data.Repository;
 using CollegeApp.MyLogging;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -29,7 +30,9 @@ namespace CollegeApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IMyLoger, LogToFile>();
-            builder.Services.AddDbContext<CollegeDBContext>(options =>
+            builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
+            builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>)); 
+            builder.Services.AddDbContext<CollegeDBContext>(options =>  
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnect"));
             });
@@ -37,7 +40,7 @@ namespace CollegeApp
             builder.Services.AddCors(options => options.AddPolicy("MyTestCORS", policy =>
             {
                 //policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-                policy.WithOrigins("http://127.0.0.1:5510");
+                policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
             }));
 
             var app = builder.Build();
@@ -51,7 +54,7 @@ namespace CollegeApp
 
             app.UseHttpsRedirection();
 
-            //app.UseCors("MyTestCORS");
+            app.UseCors("MyTestCORS");
 
             app.UseAuthorization();
 

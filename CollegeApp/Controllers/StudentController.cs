@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CollegeApp.Data;
+using CollegeApp.Data.Repository;
 using CollegeApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +16,15 @@ namespace CollegeApp.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private readonly CollegeDBContext _context;
+        
         private readonly ILogger<StudentController> _logger;
         private readonly IMapper _mapper;
+        private readonly ICollegeRepository<Student> _studentRepository;
+        //private readonly ICollegeRepository<Student> _studentRepository;
 
-        public StudentController(CollegeDBContext context, ILogger<StudentController> logger, IMapper mapper)
+        public StudentController(ILogger<StudentController> logger, IMapper mapper, ICollegeRepository<Student> studentRepository)
         {
-            _context = context;
+            _studentRepository = studentRepository;
             _logger = logger;
             _mapper = mapper;
         }
@@ -33,7 +36,7 @@ namespace CollegeApp.Controllers
         public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentsAsync()
         {
             _logger.LogInformation("Get Students method started");
-            var students = await _context.Students.ToListAsync();
+            var students = await _studentRepository.GetAllAsync();
             var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
             return Ok(studentDTOData);
         }
@@ -52,7 +55,7 @@ namespace CollegeApp.Controllers
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var student = await _context.Students.Where(s => s.Id == id).FirstOrDefaultAsync();
+            var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
 
             if (student == null)
             {
@@ -80,7 +83,7 @@ namespace CollegeApp.Controllers
 
             name = name.ToLower();
 
-            var students = await _context.Students.Where(s => s.StudentName.ToLower().Contains(name)).ToListAsync();
+            var students = await _studentRepository.GetByNameAsync(student => student.StudentName.ToLower().Contains(name.ToLower()));
 
             if (!students.Any())
             {
@@ -98,24 +101,24 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteStudentByIdAsync(int id)
+        public async Task<ActionResult<bool>> DeleteStudentByIdAsync(int id)
         {
             if (id <= 0)
             {
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var student = await _context.Students.FindAsync(id);
+            var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
 
             if (student == null)
             {
                 return NotFound($"Không tìm thấy sinh viên có Id là {id}");
             }
 
-            _context.Students.Remove(student);
-            await _context.SaveChangesAsync();
+            await _studentRepository.DeleteAsync(student);
+            
 
-            return NoContent();
+            return Ok(true);
         }
 
         [HttpPost]
@@ -132,10 +135,9 @@ namespace CollegeApp.Controllers
 
             var student = _mapper.Map<Student>(model);
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            var studentAfterCreation =  await _studentRepository.CreateAsync(student);
 
-            model.Id = student.Id;
+            model.Id = studentAfterCreation.Id;
             return CreatedAtRoute("GetStudentById", new { id = model.Id }, model);
         }
 
@@ -152,7 +154,7 @@ namespace CollegeApp.Controllers
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var existingStudent = await _context.Students.AsNoTracking().Where(s => s.Id == model.Id).FirstOrDefaultAsync();
+            var existingStudent = await _studentRepository.GetByIdAsync(student => student.Id == model.Id, true);
 
             if (existingStudent == null)
             {
@@ -160,8 +162,8 @@ namespace CollegeApp.Controllers
             }
 
             var newRecord = _mapper.Map<Student>(model);
-
-            await _context.SaveChangesAsync();
+            
+            await _studentRepository.UpdateAsync(newRecord);
 
             return NoContent();
         }
