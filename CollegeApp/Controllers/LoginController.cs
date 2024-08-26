@@ -30,8 +30,16 @@ namespace CollegeApp.Controllers
             {
                 Username = model.Username,
             };
+
+            byte[] key = null;
+            if (model.Policy == "Local")
+                key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWTSecretForLocal"));
+            else if (model.Policy == "Microsoft")
+                key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWTSecretForMicrosoft"));
+            else
+                key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWTSecretForGoogle"));
+
             if (model.Username == "quygagay" && model.Password == "Anhquy123") {
-                var key = Encoding.ASCII.GetBytes(_configuration.GetValue<string>("JWTSecret"));
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var tokenDescriptor = new SecurityTokenDescriptor()
                 {
@@ -47,8 +55,6 @@ namespace CollegeApp.Controllers
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 respone.token = tokenHandler.WriteToken(token);
-
-
             }
             else
             {
