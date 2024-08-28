@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace CollegeApp.Controllers
@@ -20,10 +21,11 @@ namespace CollegeApp.Controllers
     //[EnableCors(PolicyName = "AllowOnlyLocalhost")]
     public class StudentController : ControllerBase
     {
-        
+
         private readonly ILogger<StudentController> _logger;
         private readonly IMapper _mapper;
         private readonly ICollegeRepository<Student> _studentRepository;
+        private APIResponse _apiResponse;
         //private readonly ICollegeRepository<Student> _studentRepository;
 
         public StudentController(ILogger<StudentController> logger, IMapper mapper, ICollegeRepository<Student> studentRepository)
@@ -31,6 +33,7 @@ namespace CollegeApp.Controllers
             _studentRepository = studentRepository;
             _logger = logger;
             _mapper = mapper;
+            _apiResponse = new APIResponse();
         }
 
         [HttpGet]
@@ -39,14 +42,27 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        
-        
-        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentsAsync()
+
+
+        public async Task<ActionResult<APIResponse>> GetStudentsAsync()
         {
-            _logger.LogInformation("Get Students method started");
-            var students = await _studentRepository.GetAllAsync();
-            var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
-            return Ok(studentDTOData);
+            try
+            {
+                _logger.LogInformation("Get All Students method started");
+                var students = await _studentRepository.GetAllAsync();
+                _apiResponse.Data = _mapper.Map<List<StudentDTO>>(students);
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Status = false;
+                return _apiResponse;
+            }
+
         }
 
         [HttpGet]
@@ -57,25 +73,41 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<StudentDTO>> GetStudentByIdAsync(int id)
+        public async Task<ActionResult<APIResponse>> GetStudentByIdAsync(int id)
         {
-            if (id <= 0)
+
+            try
             {
-                _logger.LogWarning("Bad Request: {id}", id);
-                return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                if (id <= 0)
+                {
+                    _logger.LogWarning("Bad Request: {id}", id);
+                    return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                }
+
+                var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
+
+                if (student == null)
+                {
+                    _logger.LogError("Student not found with Id: {id}", id);
+                    return NotFound($"Không tìm thấy sinh viên có Id là {id}");
+                }
+
+                _apiResponse.Data = _mapper.Map<StudentDTO>(student);
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Status = false;
+                return _apiResponse;
+
             }
 
-            var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
 
-            if (student == null)
-            {
-                _logger.LogError("Student not found with Id: {id}", id);
-                return NotFound($"Không tìm thấy sinh viên có Id là {id}");
-            }
-
-            var studentDTO = _mapper.Map<StudentDTO>(student);
-
-            return Ok(studentDTO);
         }
 
         [HttpGet]
@@ -86,25 +118,39 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudentByNameAsync(string name)
+        public async Task<ActionResult<APIResponse>> GetStudentByNameAsync(string name)
         {
-            if (string.IsNullOrEmpty(name))
+            try
             {
-                return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                if (string.IsNullOrEmpty(name))
+                {
+                    return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                }
+
+                name = name.ToLower();
+
+                var students = await _studentRepository.GetByNameAsync(student => student.StudentName.ToLower().Contains(name.ToLower()));
+
+                if (!students.Any())
+                {
+                    return NotFound("Không tìm thấy dữ liệu");
+                }
+
+                _apiResponse.Data = _mapper.Map<List<StudentDTO>>(students);
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Status = false;
+                return _apiResponse;
             }
 
-            name = name.ToLower();
 
-            var students = await _studentRepository.GetByNameAsync(student => student.StudentName.ToLower().Contains(name.ToLower()));
-
-            if (!students.Any())
-            {
-                return NotFound("Không tìm thấy dữ liệu");
-            }
-
-            var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
-
-            return Ok(studentDTOData);
         }
 
         [HttpDelete]
@@ -115,46 +161,81 @@ namespace CollegeApp.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<bool>> DeleteStudentByIdAsync(int id)
+        public async Task<ActionResult<APIResponse>> DeleteStudentByIdAsync(int id)
         {
-            if (id <= 0)
+            try
             {
-                return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                if (id <= 0)
+                {
+                    return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                }
+
+                var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
+
+                if (student == null)
+                {
+                    return NotFound($"Không tìm thấy sinh viên có Id là {id}");
+                }
+
+                await _studentRepository.DeleteAsync(student);
+
+                _apiResponse.Data = true;
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+
+
+                return Ok(true);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Status = false;
+                return _apiResponse;
             }
 
-            var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
 
-            if (student == null)
-            {
-                return NotFound($"Không tìm thấy sinh viên có Id là {id}");
-            }
-
-            await _studentRepository.DeleteAsync(student);
-            
-
-            return Ok(true);
         }
 
         [HttpPost]
         [Route("Create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<StudentDTO>> CreateStudentAsync([FromBody] StudentDTO model)
+        public async Task<ActionResult<APIResponse>> CreateStudentAsync([FromBody] StudentDTO model)
         {
-            if (model == null || string.IsNullOrWhiteSpace(model.StudentName) || string.IsNullOrWhiteSpace(model.Email))
+            try
             {
-                return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                if (model == null || string.IsNullOrWhiteSpace(model.StudentName) || string.IsNullOrWhiteSpace(model.Email))
+                {
+                    return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
+                }
+
+                var student = _mapper.Map<Student>(model);
+
+                var studentAfterCreation = await _studentRepository.CreateAsync(student);
+
+                model.Id = studentAfterCreation.Id;
+
+                _apiResponse.Data = model;
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.Created;
+
+
+                return CreatedAtRoute("GetStudentById", new { id = model.Id }, _apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Errors.Add(ex.Message);
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Status = false;
+                return _apiResponse;
             }
 
-            var student = _mapper.Map<Student>(model);
 
-            var studentAfterCreation =  await _studentRepository.CreateAsync(student);
-
-            model.Id = studentAfterCreation.Id;
-            return CreatedAtRoute("GetStudentById", new { id = model.Id }, model);
         }
 
         [HttpPut]
@@ -180,7 +261,7 @@ namespace CollegeApp.Controllers
             }
 
             var newRecord = _mapper.Map<Student>(model);
-            
+
             await _studentRepository.UpdateAsync(newRecord);
 
             return NoContent();
