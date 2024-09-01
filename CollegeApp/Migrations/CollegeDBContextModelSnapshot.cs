@@ -237,7 +237,7 @@ namespace CollegeApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserType")
+                    b.Property<int>("UserTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Username")
@@ -248,6 +248,8 @@ namespace CollegeApp.Migrations
 
                     b.HasIndex("Id")
                         .HasDatabaseName("index-User-Id");
+
+                    b.HasIndex("UserTypeId");
 
                     b.ToTable("User", (string)null);
                 });
@@ -270,10 +272,58 @@ namespace CollegeApp.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex(new[] { "UserId", "RoleId" }, "UK_UserRoleMapping")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("UserRoleMapping", (string)null);
+                    b.ToTable("UserRoleMappings", (string)null);
+                });
+
+            modelBuilder.Entity("CollegeApp.Data.UserType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1500)
+                        .HasColumnType("nvarchar(1500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usertype", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "For Students",
+                            Name = "Student"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "For Faculty",
+                            Name = "Faculty"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "For Supporting Staff",
+                            Name = "Supporting Staff"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "For Teachers",
+                            Name = "Teacher"
+                        });
                 });
 
             modelBuilder.Entity("CollegeApp.Data.RolePrivilege", b =>
@@ -298,21 +348,31 @@ namespace CollegeApp.Migrations
                     b.Navigation("Department");
                 });
 
+            modelBuilder.Entity("CollegeApp.Data.User", b =>
+                {
+                    b.HasOne("CollegeApp.Data.UserType", "UserType")
+                        .WithMany("Users")
+                        .HasForeignKey("UserTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_User_UserType");
+
+                    b.Navigation("UserType");
+                });
+
             modelBuilder.Entity("CollegeApp.Data.UserRoleMapping", b =>
                 {
                     b.HasOne("CollegeApp.Data.Role", "Role")
                         .WithMany("UserRoleMappings")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_UserRoleMapping_Role");
+                        .IsRequired();
 
                     b.HasOne("CollegeApp.Data.User", "User")
                         .WithMany("UserRoleMappings")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_UserRoleMapping_User");
+                        .IsRequired();
 
                     b.Navigation("Role");
 
@@ -334,6 +394,11 @@ namespace CollegeApp.Migrations
             modelBuilder.Entity("CollegeApp.Data.User", b =>
                 {
                     b.Navigation("UserRoleMappings");
+                });
+
+            modelBuilder.Entity("CollegeApp.Data.UserType", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

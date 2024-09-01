@@ -15,13 +15,16 @@ namespace CollegeApp.Data.Config
             builder.Property(x => x.Username).IsRequired();
             builder.Property(x => x.Password).IsRequired();
             builder.Property(x => x.PasswordSalt).IsRequired();
-            builder.Property(x => x.UserType).IsRequired();
+            builder.Property(x => x.UserTypeId).IsRequired();
             builder.Property(x => x.IsActive).IsRequired();
             builder.Property(x => x.IsDeleted).IsRequired();
             builder.Property(x => x.CreatedDate).IsRequired();
             builder.Property(x => x.ModifiedDate).IsRequired();
 
-
+            builder.HasOne(x => x.UserType)
+                .WithMany(x => x.Users)
+                .HasForeignKey(x => x.UserTypeId)
+                .HasConstraintName("FK_User_UserType");
         }
     }
 }

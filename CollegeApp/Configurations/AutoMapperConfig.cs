@@ -9,6 +9,7 @@ namespace CollegeApp.Configurations
         public AutoMapperConfig()
         {
             CreateMap<Student, StudentDTO>().ReverseMap(); //.AddTransform<string>(n => string.IsNullOrEmpty(n)? "khong tim thay du lieu" : n);
+            CreateMap<Role, RoleDTO>().ReverseMap();
         }
     }
 }

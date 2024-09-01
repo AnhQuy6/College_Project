@@ -62,7 +62,7 @@ namespace CollegeApp
 
 
             builder.Services.AddScoped<IMyLoger, LogToFile>();
-            builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
+            //builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
             builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>)); 
             builder.Services.AddDbContext<CollegeDBContext>(options =>  
             {
