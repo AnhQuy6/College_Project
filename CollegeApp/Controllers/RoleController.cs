@@ -5,7 +5,9 @@ using CollegeApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Net;
+using System.Threading.Tasks.Dataflow;
 
 namespace CollegeApp.Controllers
 {
@@ -143,7 +145,63 @@ namespace CollegeApp.Controllers
                 _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 _apiResponse.Errors.Add(ex.Message);
                 return _apiResponse;
+            }   
+        }
+
+        [HttpPut]
+        [Route("Update")]
+        public async Task<ActionResult<APIResponse>> UpdateRole([FromBody] RoleDTO model)
+        {
+            try
+            {
+                if (model == null || model.Id <= 0)
+                    return BadRequest("Du lieu khong hop le, vui long nhap lai");
+                var existingRole = await _roleRepository.GetByIdAsync(s => s.Id == model.Id, true);
+                if (existingRole == null)
+                    return NotFound("Khong tim thay du lieu");
+                var result = _mapper.Map<Role>(model);
+                result.IsDeleted = false;
+                result.CreatedDate = DateTime.Now;
+                result.ModifiedDate = DateTime.Now;
+                await _roleRepository.UpdateAsync(result);
+                _apiResponse.Data = result;
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
             }
-        }   
+            catch (Exception ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode= HttpStatusCode.InternalServerError;
+                _apiResponse.Errors.Add(ex.Message);
+                return _apiResponse;
+            }
+        }
+
+        [HttpDelete]
+        [Route("Delete/{id:int}")]
+        public async Task<ActionResult<APIResponse>> DeleteRoleAsync(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                    return BadRequest("Du lieu khong hop le, vui long nhap lai");
+                var role = await _roleRepository.GetByIdAsync(s => s.Id == id);
+                if (role == null) 
+                    return NotFound();
+                await _roleRepository.DeleteAsync(role);
+                _apiResponse.Status = true;
+                _apiResponse.Data = true;
+                _apiResponse.StatusCode =HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.Data = false;
+                _apiResponse.Errors.Add(ex.Message);
+                return _apiResponse;
+            }
+        }
     }
 }
