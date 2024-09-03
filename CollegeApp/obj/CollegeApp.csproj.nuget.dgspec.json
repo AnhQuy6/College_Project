@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\FileC#\\CollegeApp\\CollegeApp\\CollegeApp.csproj": {}
+    "F:\\FileCSharp\\CollegeApp\\CollegeApp\\CollegeApp.csproj": {}
   },
   "projects": {
-    "F:\\FileC#\\CollegeApp\\CollegeApp\\CollegeApp.csproj": {
+    "F:\\FileCSharp\\CollegeApp\\CollegeApp\\CollegeApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\FileC#\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
+        "projectUniqueName": "F:\\FileCSharp\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
         "projectName": "CollegeApp",
-        "projectPath": "F:\\FileC#\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
+        "projectPath": "F:\\FileCSharp\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
         "packagesPath": "C:\\Users\\FPTSHOP\\.nuget\\packages\\",
-        "outputPath": "F:\\FileC#\\CollegeApp\\CollegeApp\\obj\\",
+        "outputPath": "F:\\FileCSharp\\CollegeApp\\CollegeApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\FPTSHOP\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "4TROMTyMgnGEJAn8mxjopNk8cd8lnvP0DCDMrXCZcffUxm7TXABAe4ncLA+Hux98zAD1zaSXVPCAeNqFSA7C3Q==",
+  "dgSpecHash": "qI3BnW4VjFTozh36wjazrdgWWkMVZwm8PPcT4J6FM6zx1jn4nYZY+BEXpr3TAWHbF3+c7miTFYgXzxMKrQzTSg==",
   "success": true,
-  "projectFilePath": "F:\\FileC#\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
+  "projectFilePath": "F:\\FileCSharp\\CollegeApp\\CollegeApp\\CollegeApp.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\FPTSHOP\\.nuget\\packages\\automapper\\13.0.1\\automapper.13.0.1.nupkg.sha512",
     "C:\\Users\\FPTSHOP\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
