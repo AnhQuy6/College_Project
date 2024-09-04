@@ -38,6 +38,18 @@ namespace CollegeApp.Data.Repository
             return await _dbSet.Where(filter).FirstOrDefaultAsync();
 
         }
+
+        public async Task<List<T>> GetAllByFilterAsync(Expression<Func<T, bool>> filter, bool useNoTracking = false)
+        {
+            if (useNoTracking)
+            {
+                return await _dbSet.AsNoTracking().Where(filter).ToListAsync();
+
+            }
+            return await _dbSet.Where(filter).ToListAsync();
+
+        }
+
         public async Task<List<T>> GetByNameAsync(Expression<Func<T, bool>> filter)
         {
             return await _dbSet.Where(filter).ToListAsync();
