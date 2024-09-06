@@ -69,7 +69,7 @@ export class RoleComponent {
   Save() {
     if (this.roleForm.value.id == 0) {
       this._roleService.createRole({ ...this.roleForm.value }).subscribe({
-        //Success  
+        //Successs  
         next: (result: any) => {
           if (result.status)
             this._notificationService.successMessage("Role created Successfully", "Created");
