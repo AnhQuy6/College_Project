@@ -188,5 +188,31 @@ namespace CollegeApp.Controllers
             }
         }
 
+        [HttpDelete]
+        [Route("Delete/{id:int}", Name = "DeleteRolePrivilege")]
+        public async Task<ActionResult<APIResponse>> DeleteRolePrivilegeAsync(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                    return BadRequest("Du lieu khong hop le, vui long nhap lai");
+                var role = await _rolePrivilegeRepository.GetByIdAsync(s => s.Id == id);
+                if (role == null)
+                    return NotFound();
+                await _rolePrivilegeRepository.DeleteAsync(role);
+                _apiResponse.Status = true;
+                _apiResponse.Data = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.Data = false;
+                _apiResponse.Errors.Add(ex.Message);
+                return _apiResponse;
+            }
+        }
+
     }
 }

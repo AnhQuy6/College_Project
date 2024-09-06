@@ -18,13 +18,13 @@ export class RoleService {
         return this._httpClient.delete('https://localhost:44359/api/Role/Delete/' + id, this.getHeaders());
     }
     getRolePrivileges(roleId: number) {
-        return this._httpClient.get("" + `${roleId}`, this.getHeaders())
+        return this._httpClient.get("https://localhost:44359/api/RolePrivilege/All/" + `${roleId}`, this.getHeaders())
     }   
     saveRolePrivileges(rolePrivilege: any) {
-        return this._httpClient.post("", rolePrivilege, this.getHeaders());
+        return this._httpClient.post("https://localhost:44359/api/RolePrivilege/Create", rolePrivilege, this.getHeaders());
     }
     removeRolePrivileges(id: number) {
-        return this._httpClient.delete('' + id, this.getHeaders());
+        return this._httpClient.delete('https://localhost:44359/api/RolePrivilege/Delete/' + id, this.getHeaders());
     }
     private loginHeaders(): any {
         return {
