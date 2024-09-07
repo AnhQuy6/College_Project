@@ -11,6 +11,8 @@ namespace CollegeApp.Configurations
             CreateMap<Student, StudentDTO>().ReverseMap(); //.AddTransform<string>(n => string.IsNullOrEmpty(n)? "khong tim thay du lieu" : n);
             CreateMap<Role, RoleDTO>().ReverseMap();
             CreateMap<RolePrivilege, RolePrivilegeDTO>().ReverseMap();
+            CreateMap<UserDTO, User>().ReverseMap();
+            CreateMap<UserReadonlyDTO, User>().ReverseMap();
         }
     }
 }

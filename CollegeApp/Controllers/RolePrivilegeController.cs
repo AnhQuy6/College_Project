@@ -83,7 +83,7 @@ namespace CollegeApp.Controllers
             {
                 if (id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var rolePrivilege = await _rolePrivilegeRepository.GetByIdAsync(s => s.Id == id);
+                var rolePrivilege = await _rolePrivilegeRepository.GetAsync(s => s.Id == id);
                 if (rolePrivilege == null)
                     return NotFound($"Khong tim thay dac quyen co id la {id}");
                 _apiResponse.Data = _mapper.Map<RolePrivilegeDTO>(rolePrivilege);
@@ -166,7 +166,7 @@ namespace CollegeApp.Controllers
             {
                 if (model == null || model.Id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var existingRolePrivilege = await _rolePrivilegeRepository.GetByIdAsync(s => s.Id == model.Id, true);
+                var existingRolePrivilege = await _rolePrivilegeRepository.GetAsync(s => s.Id == model.Id, true);
                 if (existingRolePrivilege == null)
                     return NotFound("Khong tim thay du lieu");
                 var result = _mapper.Map<RolePrivilege>(model);
@@ -196,7 +196,7 @@ namespace CollegeApp.Controllers
             {
                 if (id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var role = await _rolePrivilegeRepository.GetByIdAsync(s => s.Id == id);
+                var role = await _rolePrivilegeRepository.GetAsync(s => s.Id == id);
                 if (role == null)
                     return NotFound();
                 await _rolePrivilegeRepository.DeleteAsync(role);

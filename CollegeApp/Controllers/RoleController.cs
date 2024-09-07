@@ -61,7 +61,7 @@ namespace CollegeApp.Controllers
             {
                 if (id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var role = await _roleRepository.GetByIdAsync(s => s.Id == id);
+                var role = await _roleRepository.GetAsync(s => s.Id == id);
                 if (role == null)
                     return NotFound($"Khong tim thay vai tro co id la {id}");
                 _apiResponse.Data = _mapper.Map<RoleDTO>(role);
@@ -156,7 +156,7 @@ namespace CollegeApp.Controllers
             {
                 if (model == null || model.Id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var existingRole = await _roleRepository.GetByIdAsync(s => s.Id == model.Id, true);
+                var existingRole = await _roleRepository.GetAsync(s => s.Id == model.Id, true);
                 if (existingRole == null)
                     return NotFound("Khong tim thay du lieu");
                 var result = _mapper.Map<Role>(model);
@@ -186,7 +186,7 @@ namespace CollegeApp.Controllers
             {
                 if (id <= 0)
                     return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var role = await _roleRepository.GetByIdAsync(s => s.Id == id);
+                var role = await _roleRepository.GetAsync(s => s.Id == id);
                 if (role == null) 
                     return NotFound();
                 await _roleRepository.DeleteAsync(role);

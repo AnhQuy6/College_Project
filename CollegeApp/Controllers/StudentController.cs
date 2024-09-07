@@ -84,7 +84,7 @@ namespace CollegeApp.Controllers
                     return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
                 }
 
-                var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
+                var student = await _studentRepository.GetAsync(student => student.Id == id, false);
 
                 if (student == null)
                 {
@@ -170,7 +170,7 @@ namespace CollegeApp.Controllers
                     return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
                 }
 
-                var student = await _studentRepository.GetByIdAsync(student => student.Id == id, false);
+                var student = await _studentRepository.GetAsync(student => student.Id == id, false);
 
                 if (student == null)
                 {
@@ -252,7 +252,7 @@ namespace CollegeApp.Controllers
                 return BadRequest("Dữ liệu không hợp lệ, vui lòng nhập lại");
             }
 
-            var existingStudent = await _studentRepository.GetByIdAsync(student => student.Id == model.Id, true);
+            var existingStudent = await _studentRepository.GetAsync(student => student.Id == model.Id, true);
 
             if (existingStudent == null)
             {

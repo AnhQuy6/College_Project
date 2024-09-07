@@ -3,6 +3,7 @@ using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.Data.Repository;
 using CollegeApp.MyLogging;
+using CollegeApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -63,7 +64,8 @@ namespace CollegeApp
 
             builder.Services.AddScoped<IMyLoger, LogToFile>();
             //builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
-            builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>)); 
+            builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>));
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddDbContext<CollegeDBContext>(options =>  
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnect"));
