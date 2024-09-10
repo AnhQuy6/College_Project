@@ -22,11 +22,11 @@ namespace CollegeApp.Controllers
 
         [HttpGet]
         [Route("All", Name = "GetAllUsers")]
-        public async Task<ActionResult<APIResponse>> GetAllUsersAsync()
+        public async Task<ActionResult<APIResponse>> GetUsersAsync()
         {
             try
             {
-                var users = await _userService.GetAllUsersAsync();
+                var users = await _userService.GetUsersAsync();
                 _apiResponse.Data = users;
                 _apiResponse.Status = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
@@ -117,6 +117,58 @@ namespace CollegeApp.Controllers
                 _apiResponse.Errors.Add(ex.Message);
                 return _apiResponse;
             }
+        }
+
+        [HttpPut]
+        [Route("Update")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<APIResponse>> UpdateUserAsync(UserDTO model)
+        {
+            try
+            {
+                if (model.Id <= 0 || model == null)
+                    return BadRequest("Du lieu khong hop le, vui long nhap lai");
+
+                var result = await _userService.UpdateUserAsync(model);
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode=HttpStatusCode.OK;
+                _apiResponse.Data = result;
+                return Ok(_apiResponse);
+            } catch (Exception ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Errors.Add(ex.Message);
+                return _apiResponse;
+            }
+        }
+
+        [HttpDelete]
+        [Route("{id:int}", Name = "DeleteUser")]
+        public async Task<ActionResult<APIResponse>> DeleteUserAsync(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                    return BadRequest($"Vui long nhap id co gia tri >= 0");
+                var result = await _userService.DeleteUserAsync(id);
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.Data = result;
+                return Ok(_apiResponse);
+            } catch (Exception ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
+                _apiResponse.Errors.Add(ex.Message);
+                return _apiResponse;
+            }
+
         }
     }
 }

@@ -6,8 +6,10 @@ namespace CollegeApp.Services
     {
         (string PasswordHash, string Salt) CreatePasswordHashWithSalt(string passwordHash);
         Task<bool> CreateUserAsync(UserDTO model);
-        Task<List<UserReadonlyDTO>> GetAllUsersAsync();
+        Task<List<UserReadonlyDTO>> GetUsersAsync();
         Task<UserReadonlyDTO> GetUserByIdAsync(int id);
         Task<UserReadonlyDTO> GetUserByNameAsync(string username);
+        Task<bool> UpdateUserAsync(UserDTO model);
+        Task<bool> DeleteUserAsync(int id);
     }
 }

@@ -4,6 +4,8 @@ using CollegeApp.Data.Repository;
 using CollegeApp.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
@@ -19,21 +21,21 @@ namespace CollegeApp.Services
             _mapper = mapper;
         }
 
-        public async Task<List<UserReadonlyDTO>> GetAllUsersAsync()
+        public async Task<List<UserReadonlyDTO>> GetUsersAsync()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _userRepository.GetAllByFilterAsync(s => !s.IsDeleted);
             return _mapper.Map<List<UserReadonlyDTO>>(users);
         }
 
         public async Task<UserReadonlyDTO> GetUserByIdAsync(int id)
         {
-            var user = await _userRepository.GetAsync(s => s.Id == id);
+            var user = await _userRepository.GetAsync(s => s.Id == id && !s.IsDeleted);
             return _mapper.Map<UserReadonlyDTO>(user);
         }
 
         public async Task<UserReadonlyDTO> GetUserByNameAsync(string username)
         {
-            var user = await _userRepository.GetAsync(s => s.Username.Equals(username));
+            var user = await _userRepository.GetAsync(s => s.Username.Equals(username) || !s.IsDeleted);
             return _mapper.Map<UserReadonlyDTO>(user);
         }
 
@@ -65,6 +67,52 @@ namespace CollegeApp.Services
 
             return true;
         }
+
+        public async Task<bool> UpdateUserAsync(UserDTO model)
+        {
+            ArgumentNullException.ThrowIfNull(model, nameof(model));
+
+            var existingUser = await _userRepository.GetAsync(s => s.Id == model.Id, true);
+            if (existingUser == null)
+            {
+                throw new Exception($"Khong tim thay nguoi dung co id la {existingUser.Id}");
+            }
+
+            var userToUpdate = _mapper.Map<User>(model);
+
+            userToUpdate.CreatedDate = DateTime.Now;
+            userToUpdate.ModifiedDate = DateTime.Now;
+            
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                var passwordHash = CreatePasswordHashWithSalt(model.Password);
+                userToUpdate.Password = passwordHash.PasswordHash;
+                userToUpdate.PasswordSalt = passwordHash.Salt;
+            }
+
+            await _userRepository.UpdateAsync(userToUpdate);
+
+            return true;
+
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            User existingUser = await _userRepository.GetAsync(s => s.Id == id, true);
+
+            if (existingUser == null)
+            {
+                throw new Exception($"Khong tim thay nguoi dung co id la {id}");
+            }
+
+            existingUser.IsDeleted = true;
+            existingUser.ModifiedDate = DateTime.Now;
+
+            await _userRepository.UpdateAsync(existingUser);
+            return true;
+        }      
+
+        
 
         public (string PasswordHash, string Salt) CreatePasswordHashWithSalt(string password)
         {
