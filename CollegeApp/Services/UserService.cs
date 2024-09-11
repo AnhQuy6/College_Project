@@ -67,16 +67,29 @@ namespace CollegeApp.Services
 
             return true;
         }
-
+                                                                    
         public async Task<bool> UpdateUserAsync(UserDTO model)
         {
-            ArgumentNullException.ThrowIfNull(model, nameof(model));
+            if (model == null)
+            {
+                throw new ArgumentNullException($"Du lieu nhap khong duoc phep chua gia tri {null}", nameof(model));
+            }
+
+            if (string.IsNullOrEmpty(model.Username) || model.Username.Contains(" "))
+            {
+                throw new ArgumentException("Username khong duoc de trong hoac chua khoang trang", nameof(model.Username));
+            }
+
+            if (string.IsNullOrEmpty(model.Password) || model.Password.Contains(" "))
+            {
+                throw new ArgumentException("Password khong duoc de trong hoac chua khoang trang", nameof(model.Password));
+            }
+
 
             var existingUser = await _userRepository.GetAsync(s => s.Id == model.Id, true);
+
             if (existingUser == null)
-            {
-                throw new Exception($"Khong tim thay nguoi dung co id la {existingUser.Id}");
-            }
+                throw new KeyNotFoundException($"Khong tim thay nguoi dung co id la {model.Id}");
 
             var userToUpdate = _mapper.Map<User>(model);
 
@@ -98,21 +111,22 @@ namespace CollegeApp.Services
 
         public async Task<bool> DeleteUserAsync(int id)
         {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id),"ID phải lớn hơn 0");
+
             User existingUser = await _userRepository.GetAsync(s => s.Id == id, true);
 
             if (existingUser == null)
-            {
-                throw new Exception($"Khong tim thay nguoi dung co id la {id}");
-            }
+                throw new KeyNotFoundException($"Không tìm thấy người dùng có id là {id}");
 
             existingUser.IsDeleted = true;
             existingUser.ModifiedDate = DateTime.Now;
 
             await _userRepository.UpdateAsync(existingUser);
             return true;
-        }      
+        }
 
-        
+
 
         public (string PasswordHash, string Salt) CreatePasswordHashWithSalt(string password)
         {
