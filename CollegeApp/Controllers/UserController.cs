@@ -46,23 +46,34 @@ namespace CollegeApp.Controllers
         public async Task<ActionResult<APIResponse>> GetUserByIdAsync(int id)
         {
             try
-            {
-                if (id <= 0)
-                    return BadRequest($"id = ${id} khong hop le, vui long nhap id co gia tri > 0");
-                var user = await _userService.GetUserByIdAsync(id);
-                if (user == null)
-                    return NotFound($"Khong tim thay nguoi dung co id la {id}");
-                _apiResponse.Data = user;
+            {   
+                var result = await _userService.GetUserByIdAsync(id);
+                _apiResponse.Data = result;
                 _apiResponse.Status = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 return Ok(_apiResponse);
 
-            } catch (Exception ex)
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                _apiResponse.Errors.Add(ex.Message);
+                return BadRequest(_apiResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                _apiResponse.Errors.Add(ex.Message);
+                return NotFound(_apiResponse);
+            }
+            catch (Exception ex)
             {
                 _apiResponse.Status = false;
                 _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 _apiResponse.Errors.Add(ex.Message);
-                return _apiResponse;
+                return StatusCode(500, _apiResponse);
             }
         }
 
@@ -71,24 +82,34 @@ namespace CollegeApp.Controllers
         public async Task<ActionResult<APIResponse>> GetUserByNameAsync(string username)
         {
             try
-            {
-                if (string.IsNullOrEmpty(username))
-                    return BadRequest("Du lieu khong hop le, vui long nhap lai");
-                var user = await _userService.GetUserByNameAsync(username);
-                if (user == null)
-                    return NotFound($"Khong tim thay nguoi dung co ten la {username}");
-                _apiResponse.Data = user;
+            {    
+                var result = await _userService.GetUserByNameAsync(username);
+                _apiResponse.Data = result;
                 _apiResponse.Status = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 return Ok(_apiResponse);
 
+            }
+            catch (ArgumentException ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                _apiResponse.Errors.Add(ex.Message);
+                return BadRequest(_apiResponse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _apiResponse.Status = false;
+                _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                _apiResponse.Errors.Add(ex.Message);
+                return NotFound(_apiResponse);
             }
             catch (Exception ex)
             {
                 _apiResponse.Status = false;
                 _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 _apiResponse.Errors.Add(ex.Message);
-                return _apiResponse;
+                return StatusCode(500, _apiResponse);
             }
         }
 
@@ -110,12 +131,34 @@ namespace CollegeApp.Controllers
                 _apiResponse.Status = true;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 return Ok(_apiResponse);
-            } catch (Exception ex)
+            } 
+            catch (ArgumentNullException ex)
+            {
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                _apiResponse.Errors.Add(ex.Message);
+                return BadRequest(_apiResponse);
+            }
+            catch (ArgumentException ex)
+            {
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                _apiResponse.Errors.Add(ex.Message);
+                return BadRequest(_apiResponse);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _apiResponse.Status = true;
+                _apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                _apiResponse.Errors.Add(ex.Message);
+                return BadRequest(_apiResponse);
+            }
+            catch (Exception ex)
             {
                 _apiResponse.Status = true;
                 _apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 _apiResponse.Errors.Add(ex.Message);
-                return _apiResponse;
+                return StatusCode(500, _apiResponse);
             }
         }
 

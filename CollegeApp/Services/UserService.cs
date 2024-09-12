@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 
@@ -29,28 +30,57 @@ namespace CollegeApp.Services
 
         public async Task<UserReadonlyDTO> GetUserByIdAsync(int id)
         {
+            if (id <= 0)
+            {
+                throw new ArgumentOutOfRangeException("Id phai le hon 0", nameof(id));
+            }
             var user = await _userRepository.GetAsync(s => s.Id == id && !s.IsDeleted);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException($"Khong tim thay nguoi dung co Id la {id}");
+            }
+
             return _mapper.Map<UserReadonlyDTO>(user);
         }
 
-        public async Task<UserReadonlyDTO> GetUserByNameAsync(string username)
+        public async Task<List<UserReadonlyDTO>> GetUserByNameAsync(string username)
         {
-            var user = await _userRepository.GetAsync(s => s.Username.Equals(username) || !s.IsDeleted);
-            return _mapper.Map<UserReadonlyDTO>(user);
+            if (string.IsNullOrEmpty(username) || username.Contains(" "))
+            {
+                throw new ArgumentException("Ten nguoi dung khong duoc de trong hoac chua ki tu khoang trang",nameof(username));
+            }
+            var user = await _userRepository.GetByNameAsync(s => s.Username.ToLower().Contains(username.ToLower()) && !s.IsDeleted);
+
+            if (user == null)
+            {
+                throw new KeyNotFoundException("Khong tim thay du lieu");
+            }
+            return _mapper.Map<List<UserReadonlyDTO>>(user);
         }
 
         public async Task<bool> CreateUserAsync(UserDTO model)
         {
-            //if (model == null)
-            //    throw new ArgumentNullException(nameof(model));
+            if (model == null)
+            {
+                throw new ArgumentNullException($"Du lieu nhap khong duoc phep chua gia tri {null}" ,nameof(model));
+            }
 
-            ArgumentNullException.ThrowIfNull(model, "Du lieu khong hop le, vui long nhap lai");
+            if(string.IsNullOrEmpty(model.Username) || model.Username.Contains(" "))
+            {
+                throw new ArgumentException("Ten nguoi dung khong duoc de trong hoac chua ki tu khoang trang", nameof(model.Username));
+            }
+
+            if (string.IsNullOrEmpty(model.Password) || model.Password.Contains(" "))
+            {
+                throw new ArgumentException("Mat khau khong duoc de trong hoac chua ki tu khoang trang", nameof(model.Password));
+            }
 
             var existingUser = await _userRepository.GetAsync(u => u.Username.Equals(model.Username));
 
             if (existingUser != null)
             {
-                throw new Exception("Ten tai khoan da ton tai");
+                throw new InvalidOperationException("Ten tai khoan da ton tai");
             }
             User user = _mapper.Map<User>(model);
             user.IsDeleted = false;
@@ -77,12 +107,12 @@ namespace CollegeApp.Services
 
             if (string.IsNullOrEmpty(model.Username) || model.Username.Contains(" "))
             {
-                throw new ArgumentException("Username khong duoc de trong hoac chua khoang trang", nameof(model.Username));
+                throw new ArgumentException("Ten nguoi dung khong duoc de trong hoac chua khoang trang", nameof(model.Username));
             }
 
             if (string.IsNullOrEmpty(model.Password) || model.Password.Contains(" "))
             {
-                throw new ArgumentException("Password khong duoc de trong hoac chua khoang trang", nameof(model.Password));
+                throw new ArgumentException("Mat khau khong duoc de trong hoac chua khoang trang", nameof(model.Password));
             }
 
 
@@ -112,7 +142,7 @@ namespace CollegeApp.Services
         public async Task<bool> DeleteUserAsync(int id)
         {
             if (id <= 0)
-                throw new ArgumentOutOfRangeException(nameof(id),"ID phải lớn hơn 0");
+                throw new ArgumentOutOfRangeException("ID phai lon hon khong", nameof(id));
 
             User existingUser = await _userRepository.GetAsync(s => s.Id == id, true);
 
