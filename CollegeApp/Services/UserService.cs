@@ -156,8 +156,6 @@ namespace CollegeApp.Services
             return true;
         }
 
-
-
         public (string PasswordHash, string Salt) CreatePasswordHashWithSalt(string password)
         {
             var salt = new byte[128 / 8];

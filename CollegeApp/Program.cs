@@ -2,6 +2,7 @@
 using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.Data.Repository;
+using CollegeApp.Infrastructure;
 using CollegeApp.MyLogging;
 using CollegeApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,14 +23,15 @@ namespace CollegeApp
             //builder.Logging.ClearProviders();
             //builder.Logging.AddLog4Net();
 
-            #region Serilog Setttings
+            //#region Serilog Setttings
             //Log.Logger = new LoggerConfiguration()
             //    .MinimumLevel.Information()
             //    .WriteTo.File("Log/log.txt", rollingInterval: RollingInterval.Minute)
             //    .CreateLogger();
             //builder.Services.AddSerilog();
+            //#endregion
             //Add services to the container.
-            #endregion
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -66,6 +68,9 @@ namespace CollegeApp
             //builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
             builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>));
             builder.Services.AddScoped<IUserService, UserService>();
+            //builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddExceptionHandler<GlobalExceptionHandle>();
+            builder.Services.AddProblemDetails();
             builder.Services.AddDbContext<CollegeDBContext>(options =>  
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnect"));
@@ -128,6 +133,8 @@ namespace CollegeApp
                     ValidateAudience = false,
                 };
             });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -157,6 +164,7 @@ namespace CollegeApp
             //        context => context.Response.WriteAsync("Test Response 2"));
 
             //});
+            app.UseExceptionHandler();
 
             app.MapControllers();
 
