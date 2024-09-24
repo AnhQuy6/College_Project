@@ -19,15 +19,13 @@ namespace CollegeApp.Infrastructure
             Exception exception,
             CancellationToken cancellationToken)
         {
-            // Log the exception
-            _logger.LogError(exception, exception.Message);
+            string traceId = httpContext.TraceIdentifier;
+            _logger.LogError(exception, "Exception: {Message}, TraceId: {TraceId}", exception.Message, traceId);
 
-            // Initialize default values
             HttpStatusCode statusCode = HttpStatusCode.InternalServerError;
             string title = "Internal Server Error";
             string detail = exception.Message;
 
-            // Check the type of exception and map to corresponding status code
             if (exception is ArgumentException)
             {
                 statusCode = HttpStatusCode.BadRequest;
@@ -49,22 +47,20 @@ namespace CollegeApp.Infrastructure
                 title = "Not Implemented";
             }
 
-            // Create a ProblemDetails object to return error information
             var details = new ProblemDetails
             {
                 Detail = detail,
                 Instance = httpContext.Request.Path,
                 Status = (int)statusCode,
                 Title = title,
-                Type = "Error"
+                Type = "Error",
+                Extensions = { { "traceId", traceId } } 
             };
 
-            // Serialize the error details to JSON
             var response = JsonSerializer.Serialize(details);
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = (int)statusCode;
 
-            // Write the response
             await httpContext.Response.WriteAsync(response, cancellationToken);
 
             return true;
