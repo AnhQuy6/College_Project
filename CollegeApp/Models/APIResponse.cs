@@ -4,9 +4,9 @@ namespace CollegeApp.Models
 {
     public class APIResponse
     {
-        public bool Status { get; set; }
-        public HttpStatusCode StatusCode { get; set; }
+        public bool Status { get; set; } = true;
         public dynamic Data { get; set; }
-        public List<string> Errors { get; set; } = new List<string>();
+        public string Message { get; set; } = "Operation completed successfully";
+
     }
 }
