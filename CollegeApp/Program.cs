@@ -64,11 +64,9 @@ namespace CollegeApp
             });
 
 
-            builder.Services.AddScoped<IMyLoger, LogToFile>();
-            //builder.Services.AddTransient<IStudentRepository, StudentRepository>();   
             builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>));
             builder.Services.AddScoped<IUserService, UserService>();
-            //builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandle>();
             builder.Services.AddProblemDetails();
             builder.Services.AddDbContext<CollegeDBContext>(options =>  
