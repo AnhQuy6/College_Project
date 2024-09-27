@@ -10,6 +10,5 @@ namespace CollegeApp.Services
         Task<bool> CreateStudentAsync(StudentDTO model);
         Task<bool> UpdateStudentAsync(StudentDTO model);
         Task<bool> DeleteStudentAsync(int id);
-
     }
 }

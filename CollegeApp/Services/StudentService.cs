@@ -28,7 +28,7 @@ namespace CollegeApp.Services
         {
             if (id <= 0)
             {
-                throw new ArgumentOutOfRangeException("Id phai le hon 0", nameof(id));
+                throw new ArgumentException("Id phai lon hon 0", nameof(id));
             }
             var student = await _studentRepository.GetAsync(s => s.Id == id);
 
@@ -46,7 +46,7 @@ namespace CollegeApp.Services
             {
                 throw new ArgumentException("Ten sinh vien khong duoc de trong", nameof(name));
             }
-            var student = await _studentRepository.GetByNameAsync(s => s.StudentName.ToLower().Contains(name.ToLower()) && !s.IsDeleted);
+            var student = await _studentRepository.GetByNameAsync(s => s.StudentName.ToLower().Contains(name.ToLower()));
 
             if (student == null)
             {
@@ -57,11 +57,6 @@ namespace CollegeApp.Services
 
         public async Task<bool> CreateStudentAsync(StudentDTO model)
         {
-            if (model == null)
-            {
-                throw new ArgumentNullException($"Du lieu nhap khong duoc phep chua gia tri {null}", nameof(model));
-            }
-
             if (string.IsNullOrEmpty(model.StudentName))
             {
                 throw new ArgumentException("Ten sinh vien khong duoc de trong", nameof(model.StudentName));
@@ -75,13 +70,6 @@ namespace CollegeApp.Services
                 throw new ArgumentException("Dia chi khong duoc de trong", nameof(model.Address));
             }
            
-
-            var existingUser = await _studentRepository.GetAsync(u => u.StudentName.Equals(model.StudentName));
-
-            if (existingUser is not null)
-            {
-                throw new InvalidOperationException("Ten tai khoan da ton tai");
-            }
             Student student = _mapper.Map<Student>(model);
 
             await _studentRepository.CreateAsync(student);
@@ -117,7 +105,6 @@ namespace CollegeApp.Services
             await _studentRepository.UpdateAsync(studentToUpdate);
 
             return true;
-
         }
 
         public async Task<bool> DeleteStudentAsync(int id)

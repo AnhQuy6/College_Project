@@ -25,7 +25,7 @@ namespace CollegeApp.Infrastructure
             string detail = exception.Message;
             string typeUrl = "https://docs.microsoft.com/en-us/rest/api/storageservices/overview#500-internal-server-error";
 
-            if (exception is ArgumentException)
+            if (exception is ArgumentException or ArgumentNullException)
             {
                 statusCode = HttpStatusCode.BadRequest;
                 title = "Bad Request";

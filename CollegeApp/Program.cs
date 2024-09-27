@@ -3,7 +3,6 @@ using CollegeApp.Configurations;
 using CollegeApp.Data;
 using CollegeApp.Data.Repository;
 using CollegeApp.Infrastructure;
-using CollegeApp.MyLogging;
 using CollegeApp.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +66,7 @@ namespace CollegeApp
             builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>));
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<IRolePrivilegeService, RolePrivilegeService>();
             builder.Services.AddExceptionHandler<GlobalExceptionHandle>();
             builder.Services.AddProblemDetails();
             builder.Services.AddDbContext<CollegeDBContext>(options =>  
